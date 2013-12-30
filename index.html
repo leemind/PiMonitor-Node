@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    	<title>Lone Farm Real-time Health Monitor</title>
+	<link href='http://fonts.googleapis.com/css?family=Alegreya+Sans' rel='stylesheet' type='text/css'/>
+	<link rel="stylesheet" type="text/css" href="lonefarm.css"/>
+</head>
+<body>
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    	<script src="/socket.io/socket.io.js"></script>
+
+
+    <h2>Lone Farm Real Time Status Monitor</h2>
+    <h3>Fat Pipe</h3>
+    <p>Battery Voltage <span id="BatteryVoltage"></span>V</p>
+    <p>Battery Current <span id="BatteryCurrent"></span>A</p>
+    <p>Solar Current <span id="SolarCurrent"></span>A</p>
+    <p>Wind Current <span id="WindCurrent"></span>A</p>
+    <h3>Environment</h3>
+    <p>Wind Speed <span id="WindSpeedms"></span> m/s</p>
+    <p>Wind Speed <span id="WindSpeedkt"></span> knots</p>
+    <p>Wind Direction <span id="WindDirection"></span> degrees</p>
+    <h3>Security</h3>
+    <p>Entrance, last know movement <span id="Entrance"></span></p>
+    <p>Gate, last opening time <span id="GateTime"></span></p>
+    <p>Gate, last plate<span id="GatePlate"></span></p>
+
+    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+
+    <script>
+        var socket = io.connect('http://192.168.1.10:8000');
+        var BV = document.getElementById('BatteryVoltage');
+        var BC = document.getElementById('BatteryCurrent');
+        var SC = document.getElementById('SolarCurrent');
+        var WC = document.getElementById('WindCurrent');
+        var WSM = document.getElementById('WindSpeedms');
+        var WSK = document.getElementById('WindSpeedkt');
+        var WD = document.getElementById('WindDirection');
+        var EntTime = document.getElementById('Entrance');
+        var GateTime = document.getElementById('GateTime');
+        var GatePlate = document.getElementById('GatePlate');
+
+        socket.on('BatteryVoltage',function(data){
+            console.log('Battery Voltage',data);
+            BV.innerHTML = data});
+        socket.on('BatteryCurrent',function(data){
+            console.log('Battery Current',data);
+            BC.innerHTML = data});
+        socket.on('SolarCurrent',function(data){
+            console.log('Solar Current',data);
+            SC.innerHTML = data});
+        socket.on('SolarCurrent',function(data){
+            console.log('Solar Current',data);
+            SC.innerHTML = data});
+        socket.on('SolarCurrent',function(data){
+            console.log('Solar Current',data);
+            SC.innerHTML = data});
+        socket.on('SolarCurrent',function(data){
+            console.log('Solar Current',data);
+            SC.innerHTML = data});
+        socket.on('WindSpeed',function(data){
+            console.log('Wind Speed',data);
+            WSM.innerHTML = data;
+	    WSK.innerHTML = parseFloat(data * 1.943844).toFixed(2)});
+        socket.on('WindDirection',function(data){
+            console.log('Wind Direction',data);
+            WD.innerHTML = data});
+        socket.on('Entrance',function(data){
+            console.log('Entrance',data);
+            EntTime.innerHTML = data});
+    </script>
+</body>
+</html>
