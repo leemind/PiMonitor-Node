@@ -68,28 +68,13 @@ receiver.on("message", function (msg, rinfo) {
  switch(bcastmsg[0])
 	{
 	case 'BatteryVoltage':
-		BatteryVoltage = bcastmsg[1];
-		output.sockets.emit('BatteryVoltage',BatteryVoltage);
-		break;
 	case 'BatteryCurrent':
-		BatteryCurrent = bcastmsg[1];
-		output.sockets.emit('BatteryCurrent',BatteryCurrent);
-		break;
 	case 'SolarCurrent':
-		SolarCurrent = bcastmsg[1];
-		output.sockets.emit('SolarCurrent',SolarCurrent);
-		break;
-	case 'WindCurrrent':
-		WindCurrrent = bcastmsg[1];
-		output.sockets.emit('WindCurrent',WindCurrent);
-		break;
+	case 'WindCurrent':
 	case 'WindSpeed':
-		WindSpeed = bcastmsg[1];
-		output.sockets.emit('WindSpeed',WindSpeed);
-		break;
 	case 'WindDirection':
-		WindDirection = bcastmsg[1];
-		output.sockets.emit('WindDirection',WindDirection);
+	case 'PiVoltage':
+		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
 		break;
 	case 'Entrance':
 		LastEntranceMovement = Date();

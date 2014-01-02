@@ -24,6 +24,8 @@
     <p>Entrance, last know movement <span id="Entrance"></span></p>
     <p>Gate, last opening time <span id="GateTime"></span></p>
     <p>Gate, last plate<span id="GatePlate"></span></p>
+    <h3>Misc</h3>
+    <p>Pi Voltage <span id="PiVoltage"></span></p>
 
     <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
 
@@ -39,6 +41,7 @@
         var EntTime = document.getElementById('Entrance');
         var GateTime = document.getElementById('GateTime');
         var GatePlate = document.getElementById('GatePlate');
+	var PiVoltage = document.getElementById('PiVoltage');
 
         socket.on('BatteryVoltage',function(data){
             console.log('Battery Voltage',data);
@@ -49,15 +52,9 @@
         socket.on('SolarCurrent',function(data){
             console.log('Solar Current',data);
             SC.innerHTML = data});
-        socket.on('SolarCurrent',function(data){
-            console.log('Solar Current',data);
-            SC.innerHTML = data});
-        socket.on('SolarCurrent',function(data){
-            console.log('Solar Current',data);
-            SC.innerHTML = data});
-        socket.on('SolarCurrent',function(data){
-            console.log('Solar Current',data);
-            SC.innerHTML = data});
+        socket.on('WindCurrent',function(data){
+            console.log('Wind Current',data);
+            WC.innerHTML = data});
         socket.on('WindSpeed',function(data){
             console.log('Wind Speed',data);
             WSM.innerHTML = data;
@@ -68,6 +65,9 @@
         socket.on('Entrance',function(data){
             console.log('Entrance',data);
             EntTime.innerHTML = data});
+        socket.on('PiVoltage',function(data){
+            console.log('Pi Voltage',data);
+            PiVoltage.innerHTML = data});
     </script>
 </body>
 </html>
