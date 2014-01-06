@@ -8,6 +8,7 @@
 <body>
     	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     	<script src="/socket.io/socket.io.js"></script>
+	<script src="compass.js"></script>
 
 
     <h2>Lone Farm Real Time Status Monitor</h2>
@@ -26,8 +27,9 @@
     <p>Gate, last plate<span id="GatePlate"></span></p>
     <h3>Misc</h3>
     <p>Pi Voltage <span id="PiVoltage"></span></p>
+    <canvas id="compass" width="300" height="300">No canvas for you</canvas>
 
-    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+<!--    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div> -->
 
     <script>
         var socket = io.connect('http://192.168.1.10:8000');
@@ -61,7 +63,8 @@
 	    WSK.innerHTML = parseFloat(data * 1.943844).toFixed(2)});
         socket.on('WindDirection',function(data){
             console.log('Wind Direction',data);
-            WD.innerHTML = data});
+            WD.innerHTML = data;
+	    compass(data)});
         socket.on('Entrance',function(data){
             console.log('Entrance',data);
             EntTime.innerHTML = data});
