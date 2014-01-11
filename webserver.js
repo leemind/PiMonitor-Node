@@ -7,8 +7,13 @@ var dgram = require('dgram');
 var url = require('url');
 
 // Static Defs
-var httpport = 8000;
+var httpport = 843;
 var dataport = 2345;
+
+var options = {
+	key: fs.readFileSync('/etc/ssl/private/lonefarm-key.pem'),
+	cert: fs.readFileSync('/etc/ssl/private/lonefarm-cert.pem')
+	};
 
 var BatteryVoltage = 0;
 var BatteryCurrent = 0;
