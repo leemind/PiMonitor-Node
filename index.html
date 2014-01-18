@@ -9,6 +9,8 @@
     	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     	<script src="/socket.io/socket.io.js"></script>
 	<script src="compass.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
+
 
     <div id="container" style="width:600px">
     
@@ -30,16 +32,19 @@
         </div>
 
         
-        <div id="envNum" style="width:250px;height:300px;float:left">
+        <div id="envNum" style="width:250px;height:200px;float:left">
             <h3>Environment</h3>
             <p>Wind Speed <span id="WindSpeedms"></span> m/s</p>
             <p>Wind Speed <span id="WindSpeedkt"></span> knots</p>
             <p>Wind Direction <span id="WindDirection"></span> degrees</p>
         </div>
         
-        <div id="envGraphics" style="width:300px;height:300px;float:left">
-            <canvas id="compass" width="300" height="300">No canvas for you</canvas>
+        <div id="envCompass" style="width:300px;height:200px;float:left">
+            <canvas id="compass" width="300" height="200">No canvas for you</canvas>
         </div>
+
+	<div id="envChart" style="width:600px;height:400px;float:left">
+	</div>
         
         <div id="security">
             <h3>Security</h3>
@@ -52,7 +57,7 @@
      </div>
 
     <script>
-        var socket = io.connect('http://fp.lonefarm.co.uk:843');
+        var socket = io.connect('http://fp.lonefarm.co.uk:8000');
         var BV = document.getElementById('BatteryVoltage');
         var BC = document.getElementById('BatteryCurrent');
         var SC = document.getElementById('SolarCurrent');
@@ -66,31 +71,102 @@
 	var PiVoltage = document.getElementById('PiVoltage');
 
         socket.on('BatteryVoltage',function(data){
-            console.log('Battery Voltage',data);
+//            console.log('Battery Voltage',data);
             BV.innerHTML = data});
         socket.on('BatteryCurrent',function(data){
-            console.log('Battery Current',data);
+//            console.log('Battery Current',data);
             BC.innerHTML = data});
         socket.on('SolarCurrent',function(data){
-            console.log('Solar Current',data);
+//            console.log('Solar Current',data);
             SC.innerHTML = data});
         socket.on('WindCurrent',function(data){
-            console.log('Wind Current',data);
+//            console.log('Wind Current',data);
             WC.innerHTML = data});
         socket.on('WindSpeed',function(data){
-            console.log('Wind Speed',data);
+//            console.log('Wind Speed',data);
             WSM.innerHTML = data;
 	    WSK.innerHTML = parseFloat(data * 1.943844).toFixed(2)});
         socket.on('WindDirection',function(data){
-            console.log('Wind Direction',data);
+//            console.log('Wind Direction',data);
             WD.innerHTML = data;
 	    compass(data)});
         socket.on('Entrance',function(data){
-            console.log('Entrance',data);
+//            console.log('Entrance',data);
             EntTime.innerHTML = data});
         socket.on('PiVoltage',function(data){
-            console.log('Pi Voltage',data);
+//            console.log('Pi Voltage',data);
             PiVoltage.innerHTML = data});
     </script>
+
+<script>
+
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 600 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var parseDate = d3.time.format.iso.parse;
+
+var x = d3.time.scale()
+    .range([0, width]);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+var line = d3.svg.line()
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.WindSpeed); });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.json("WindSpeed.json", function(error, data) { 
+
+  data.forEach(function(d) { 
+    d.date = parseDate(d.date);
+    //d.date = d.date;
+	console.log(d.date);
+    d.WindSpeed = +d.WindSpeed;
+	console.log(d.WindSpeed);
+  });
+
+  x.domain(d3.extent(data, function(d) { return d.date; }));
+  y.domain(d3.extent(data, function(d) { return d.WindSpeed; }));
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Wind Speed (m/s)");
+
+  svg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line);
+});
+
+</script>
+
 </body>
+
+
 </html>

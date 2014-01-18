@@ -8,13 +8,17 @@ var url = require('url');
 var mongojs = require('mongojs');
 
 // Static Defs
-var httpport = 843;
+var httpport = 8000;
 var dataport = 2345;
 
-//var options = {
-//	key: fs.readFileSync('/etc/ssl/private/lonefarm-key.pem'),
-//	cert: fs.readFileSync('/etc/ssl/private/lonefarm-cert.pem')
-//	};
+var mime = {
+    "html" : "text/html",
+    "css" : "text/css",
+    "js" : "application/javascript",
+    "png" : "image/png",
+    "gif" : "image/gif",
+    "jpg" : "image/jpeg"
+};
 
 var BatteryVoltage = 0;
 var BatteryCurrent = 0;
@@ -39,14 +43,29 @@ var webserver = http.createServer(function(request, response)
 		}
 	// Work out the MIME type - cheap and cheerful, but need to serve it back
 	var type=pathname.split(".").pop();
-	console.log("Requst for "+pathname+" received, type="+type);
-	// read the requested file
-	fs.readFile('.'+pathname, function(error,data)
+	console.log("Requst for "+pathname+" received, type="+type +" MIME:"+mime[type]);
+	// Using a switch - could be if, but maybe this expands to many cases?
+	switch(type)
 		{
-		// Output the http header inc MIME type
-		response.writeHead(200, { "Content-Type": "text/"+type });
-		response.end(data,"utf-8");
-		});
+		case "json":
+			db.wind.find({"WindSpeed": {$gt: 0}}, function(err,data){
+			if(err || !data) { console.log("No Windspeed Data"); }
+                        response.writeHead(200, { "Content-Type": mime[type] });
+			response.write(JSON.stringify(data));
+                        response.end();
+
+			}); 
+//			if(err || !data) console.log("No WindSpeed Data");
+			break;
+		default:
+			// read the requested file
+			fs.readFile('.'+pathname, function(error,data)
+				{
+				// Output the http header inc MIME type
+				response.writeHead(200, { "Content-Type": mime[type] });
+				response.end(data,"utf-8");
+				});
+		}
 	}).listen(httpport);
 
 console.log("Server is running on Port",httpport);
@@ -66,10 +85,10 @@ receiver.on("error", function (err) {
 });
 
 receiver.on("message", function (msg, rinfo) {
-  console.log("receiver got: " + msg + " from " + rinfo.address + ":" + rinfo.port);
+  //console.log("receiver got: " + msg + " from " + rinfo.address + ":" + rinfo.port);
   var bcastmsg = msg.toString().split(" ");
-  console.log("messgae: "+typeof(msg));
-  console.log("bcastmsg: "+typeof(bcastmsg),bcastmsg);
+  //console.log("messgae: "+typeof(msg));
+  //console.log("bcastmsg: "+typeof(bcastmsg),bcastmsg);
 
   console.log(bcastmsg[0],bcastmsg[1]);
   
@@ -88,11 +107,11 @@ receiver.on("message", function (msg, rinfo) {
 		break;
 	case 'WindSpeed':
 		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
-		db.wind.save({date:new Date(),WindSpeed:bcastmsg[1]});
+		db.wind.save({date:new Date(),WindSpeed:parseFloat(bcastmsg[1])});
 		break;
 	case 'WindDirection':
 		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
-		db.wind.save({date:new Date(),WindDirection:bcastmsg[1]});
+		db.wind.save({date:new Date(),WindDirection:parseFloat(bcastmsg[1])});
 		break;
 	}
 
