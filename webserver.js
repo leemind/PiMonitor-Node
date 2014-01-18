@@ -5,15 +5,16 @@ var socketio = require('socket.io');
 var net = require('net');
 var dgram = require('dgram');
 var url = require('url');
+var mongojs = require('mongojs');
 
 // Static Defs
 var httpport = 843;
 var dataport = 2345;
 
-var options = {
-	key: fs.readFileSync('/etc/ssl/private/lonefarm-key.pem'),
-	cert: fs.readFileSync('/etc/ssl/private/lonefarm-cert.pem')
-	};
+//var options = {
+//	key: fs.readFileSync('/etc/ssl/private/lonefarm-key.pem'),
+//	cert: fs.readFileSync('/etc/ssl/private/lonefarm-cert.pem')
+//	};
 
 var BatteryVoltage = 0;
 var BatteryCurrent = 0;
@@ -23,6 +24,8 @@ var WindSpeed = 0;
 var WindDirection = 0;
 
 var LastEntranceMovement = 0;
+
+var db = mongojs('winddb',['wind']);
 
 // Start webserver
 var webserver = http.createServer(function(request, response) 
@@ -76,14 +79,20 @@ receiver.on("message", function (msg, rinfo) {
 	case 'BatteryCurrent':
 	case 'SolarCurrent':
 	case 'WindCurrent':
-	case 'WindSpeed':
-	case 'WindDirection':
 	case 'PiVoltage':
 		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
 		break;
 	case 'Entrance':
 		LastEntranceMovement = Date();
 		output.sockets.emit('Entrance',LastEntranceMovement);
+		break;
+	case 'WindSpeed':
+		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
+		db.wind.save({date:new Date(),WindSpeed:bcastmsg[1]});
+		break;
+	case 'WindDirection':
+		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
+		db.wind.save({date:new Date(),WindDirection:bcastmsg[1]});
 		break;
 	}
 
