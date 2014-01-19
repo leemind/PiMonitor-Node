@@ -6,6 +6,7 @@ var net = require('net');
 var dgram = require('dgram');
 var url = require('url');
 var mongojs = require('mongojs');
+var moment = require('moment');
 
 // Static Defs
 var httpport = 8000;
@@ -24,8 +25,8 @@ var BatteryVoltage = 0;
 var BatteryCurrent = 0;
 var SolarCurrent = 0;
 var WindCurrent = 0;
-var WindSpeed = 0;
-var WindDirection = 0;
+var WindSpeed = [];
+var WindDirection = [];
 
 var LastEntranceMovement = 0;
 
@@ -107,11 +108,13 @@ receiver.on("message", function (msg, rinfo) {
 		break;
 	case 'WindSpeed':
 		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
-		db.wind.save({date:new Date(),WindSpeed:parseFloat(bcastmsg[1])});
+		//db.wind.save({date:new Date(),WindSpeed:parseFloat(bcastmsg[1])});
+		WindSpeed.push({date:new Date().toISOString(),WindSpeed:parseFloat(bcastmsg[1])});
 		break;
 	case 'WindDirection':
 		output.sockets.emit(bcastmsg[0],bcastmsg[1]);
-		db.wind.save({date:new Date(),WindDirection:parseFloat(bcastmsg[1])});
+		//db.wind.save({date:new Date(),WindDirection:parseFloat(bcastmsg[1])});
+		WindDirection.push({date:new Date(),WindDirection:parseFloat(bcastmsg[1])});
 		break;
 	}
 
@@ -123,4 +126,32 @@ receiver.on("listening", function () {
 });
 
 receiver.bind(dataport);
+
+var storageInterval = 60;
+
+function storeWindData() {
+	console.log("Storing Wind Data");
+	console.log(WindSpeed);
+	if(WindSpeed.length < 2) return;
+	var cumTime = 0, cumSpeed = 0;
+	for(var i=1; i< WindSpeed.length;++i) {
+		console.log(WindSpeed[i].date);
+		var interval = (moment(WindSpeed[i].date) - moment(WindSpeed[i-1].date));
+		console.log("Interval: "+interval);
+		cumTime = cumTime + interval;
+		cumSpeed = cumSpeed + (((WindSpeed[i].WindSpeed + WindSpeed[i-1].WindSpeed)/2)*interval);
+		}
+	var avgWindSpeed = cumSpeed / cumTime;
+	console.log("Time Weighted Average WindSpeed:"+avgWindSpeed+" over "+cumTime/1000+" seconds");
+
+	// Store WindSpeed to MongoDB
+	db.wind.save({date:new Date(),WindSpeed:avgWindSpeed)});
+
+	// Delete all but last
+	var lastReading = WindSpeed.pop(); 
+	WindSpeed.length = 0;
+	WindSpeed.push(lastReading);
+}
+
+var intervalTimer = setInterval(storeWindData,storageInterval*1000);
 
