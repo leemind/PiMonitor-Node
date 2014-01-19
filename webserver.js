@@ -16,6 +16,7 @@ var mime = {
     "html" : "text/html",
     "css" : "text/css",
     "js" : "application/javascript",
+    "json" : "application/json",
     "png" : "image/png",
     "gif" : "image/gif",
     "jpg" : "image/jpeg"
@@ -49,14 +50,19 @@ var webserver = http.createServer(function(request, response)
 	switch(type)
 		{
 		case "json":
-			db.wind.find({"WindSpeed": {$gt: 0}}, function(err,data){
-			if(err || !data) { console.log("No Windspeed Data"); }
-                        response.writeHead(200, { "Content-Type": mime[type] });
-			response.write(JSON.stringify(data));
-                        response.end();
+			var now = new Date();
+			var request = pathname.substring(1).split(".",1);
+			var selector = {};
+			console.log(request);
+			selector[request] = {$gt: 0};
+			selector["date"] = {$gt: new Date(now.getTime() - (24*60*60*1000))};
 
-			}); 
-//			if(err || !data) console.log("No WindSpeed Data");
+			db.wind.find(selector,function(err,data){
+				if(err || !data) { console.log("No Windspeed Data"); }
+               		        response.writeHead(200, { "Content-Type": mime[type] });
+				response.write(JSON.stringify(data));
+                        	response.end();
+				}); 
 			break;
 		default:
 			// read the requested file
@@ -145,7 +151,7 @@ function storeWindData() {
 	console.log("Time Weighted Average WindSpeed:"+avgWindSpeed+" over "+cumTime/1000+" seconds");
 
 	// Store WindSpeed to MongoDB
-	db.wind.save({date:new Date(),WindSpeed:avgWindSpeed)});
+	db.wind.save({date:new Date(),WindSpeed:avgWindSpeed});
 
 	// Delete all but last
 	var lastReading = WindSpeed.pop(); 
