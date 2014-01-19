@@ -7,7 +7,7 @@ function compass(degrees){
 
   ctx.clearRect(0,0,size,size);
   ctx.translate(size/2,size/2);
-  ctx.scale(0.5,0.5);
+  ctx.scale(0.6,0.6);
   ctx.strokeStyle = "black";
   ctx.fillStyle = "blue";
   ctx.lineWidth = 8;
