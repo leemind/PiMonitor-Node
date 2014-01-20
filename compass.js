@@ -18,8 +18,8 @@ function compass(degrees){
 
   ctx.fillText("N",0,-textOffset)
   ctx.fillText("S",0,textOffset)
-  ctx.fillText("E",-textOffset,0)
-  ctx.fillText("W",textOffset,0)
+  ctx.fillText("W",-textOffset,0)
+  ctx.fillText("E",textOffset,0)
 
   ctx.rotate(-Math.PI/2);
 
