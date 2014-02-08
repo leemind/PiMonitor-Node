@@ -9,6 +9,7 @@
     	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     	<script src="/socket.io/socket.io.js"></script>
 	<script src="compass.js"></script>
+	<script src="windspeed.js"></script>
         <script src="http://d3js.org/d3.v3.min.js" type="text/javascript" charset="utf-8"></script>
 
 
@@ -32,18 +33,22 @@
         </div>
 
         
-        <div id="envNum" style="width:250px;height:200px;float:left">
+        <div id="envNum" style="width:600px;height:200px;float:left">
             <h3>Environment</h3>
             <p>Wind Speed <span id="WindSpeedms"></span> m/s</p>
             <p>Wind Speed <span id="WindSpeedkt"></span> knots</p>
             <p>Wind Direction <span id="WindDirection"></span> degrees</p>
+        </div>
+
+        <div id="envWindSpeedGFX" style="width:300px;height:200px;float:left;">
+            <canvas id="windSpeedGFX" width="300" height="200">No canvas for you</canvas>
         </div>
         
         <div id="envCompass" style="width:300px;height:200px;float:left">
             <canvas id="compass" width="300" height="200">No canvas for you</canvas>
         </div>
 
-	<div id="envChart" style="width:600px;height:520px;float:left">
+	<div id="envChart" style="width:600px;height:400px;float:left">
 	</div>
         
         <div id="security">
@@ -83,11 +88,12 @@
 //            console.log('Wind Current',data);
             WC.innerHTML = data});
         socket.on('WindSpeed',function(data){
-//            console.log('Wind Speed',data);
+            console.log('Wind Speed',data);
             WSM.innerHTML = data;
-	    WSK.innerHTML = parseFloat(data * 1.943844).toFixed(2)});
+	    WSK.innerHTML = parseFloat(data * 1.943844).toFixed(2);
+	    windspeed(parseFloat(data * 1.943844).toFixed(2))});
         socket.on('WindDirection',function(data){
-//            console.log('Wind Direction',data);
+            console.log('Wind Direction',data);
             WD.innerHTML = data;
 	    compass(data)});
         socket.on('Entrance',function(data){
